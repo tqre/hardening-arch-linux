@@ -1,0 +1,10 @@
+label: gpt
+device: /dev/vda
+unit: sectors
+first-lba: 2048
+last-lba: 52428766
+
+/dev/vda1 : start=        2048, size=        2048, type=21686148-6449-6E6F-744E-656564454649
+/dev/vda2 : start=        4096, size=    16777216, type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709
+/dev/vda3 : start=    16781312, size=    35647455, type=933AC7E1-2EB4-4F13-B844-0E14E2AEF915
+

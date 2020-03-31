@@ -1,0 +1,8 @@
+# Arch Linux mirrorlist
+
+## Germany
+Server = https://arch.unixpeople.org/$repo/os/$arch
+
+## Finland
+Server = http://arch.mirror.far.fi/$repo/os/$arch
+
