@@ -52,7 +52,7 @@ echo "LANG=$LOC" > /etc/locale.conf
 echo "KEYMAP=$KEYBOARD" > /etc/vconsole.conf
 echo "$SUDOUSER ALL=(ALL) ALL" >> /etc/sudoers
 
-echo -e "[Match]\nName=en*\n\n[Network]\nDHCP=true" > /etc/systemd/network/dhcp.network
+echo -e "[Match]\nName=eth0\n\n[Network]\nDHCP=true" > /etc/systemd/network/dhcp.network
 systemctl enable systemd-networkd.service
 
 echo $HOSTNAME > /etc/hostname
