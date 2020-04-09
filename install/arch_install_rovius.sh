@@ -78,7 +78,7 @@ systemctl enable sshd
 # Timeout is zero, no password? Is it possible to hijack the system here?
 grub-install --target=i386-pc /dev/xvda
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
-sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet random.trust_cpu=on"' /etc/default/grub
+sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
 EOF
