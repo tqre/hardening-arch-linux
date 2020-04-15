@@ -1,4 +1,4 @@
 
 # Hardening additions
 tmpfs	/tmp		tmpfs	defaults,rw,nosuid,nodev,noexec,relatime	0	0
-tmpfs	/dev/shm	tmpfs	defautls,rw,nosuid,nodev,noexec			0	0
+tmpfs	/dev/shm	tmpfs	defaults,rw,nosuid,nodev,noexec			0	0
