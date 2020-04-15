@@ -55,7 +55,6 @@ pacstrap /mnt base linux linux-firmware grub openssh sudo nano salt
 
 # Create filesystem table:
 genfstab -U /mnt >> /mnt/etc/fstab
-cat fstab_additions >> /mnt/etc/fstab
 
 # Settings: here-document is piped to chroot
 cat << EOF | arch-chroot /mnt
