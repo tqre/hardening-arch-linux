@@ -15,14 +15,12 @@ KEYBOARD="us"
 MASTER_IP="saltmaster"
 M_PORT="4506"
 P_PORT="4505"
-
 HOSTNAME="minion"
-SUDOUSER="user"
 
+SUDOUSER="user"
 # Silly settings
 PASSWORD="user"
 
-# Which NTP server are we actually using?
 timedatectl set-ntp true
 
 # SSH Settings
@@ -55,8 +53,9 @@ cat mirrorlist > /etc/pacman.d/mirrorlist
 # Main install command - bootstrap Arch Linux
 pacstrap /mnt base linux linux-firmware grub openssh sudo nano salt
 
-# Create file system table:
+# Create filesystem table:
 genfstab -U /mnt >> /mnt/etc/fstab
+cat fstab_additions >> /mnt/etc/fstab
 
 # Settings: here-document is piped to chroot
 cat << EOF | arch-chroot /mnt
@@ -81,7 +80,6 @@ echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
 #runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
 
 # SSH Settings:
-
 # Change default port
 sed -i "s/#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
 # Disable sftp subsystem
@@ -91,13 +89,12 @@ sed -i '/#PermitRootLogin pro/c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl enable sshd
 
 # GRUB installation
-# Timeout is zero, no password? Is it possible to hijack the system here?
 grub-install --target=i386-pc /dev/xvda
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Salt minion test
+# Salt minion
 systemctl enable salt-minion
 echo -e "master: $MASTER_IP\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $RANDOM" > /etc/salt/minion
 
