@@ -1,4 +1,4 @@
-/tmp:
+/dev/shm:
   mount.mounted:
     - device: tmpfs
     - fstype: tmpfs
@@ -8,5 +8,3 @@
       - nosuid
       - nodev
       - noexec
-      - relatime
-

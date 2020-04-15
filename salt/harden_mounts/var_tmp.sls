@@ -1,7 +1,7 @@
-/tmp:
+/var/tmp:
   mount.mounted:
-    - device: tmpfs
-    - fstype: tmpfs
+    - device: LABEL=VAR_TMP
+    - fstype: ext4
     - opts:
       - defaults
       - rw
