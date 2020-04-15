@@ -106,7 +106,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 # Salt minion
 systemctl enable salt-minion
-echo -e "master: $MASTER_IP\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $RANDOM" > /etc/salt/minion
+echo -e "master: $MASTER_IP\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
 
 EOF
 
