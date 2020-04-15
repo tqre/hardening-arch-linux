@@ -24,20 +24,30 @@ SSH_PORT="22"
 #SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting and mounting
-sfdisk /dev/xvda < partition_map_rovius
+sfdisk /dev/xvda < partition_map_rovius_32
 mkfs.vfat /dev/xvda1
 mkfs.ext4 /dev/xvda2
 mkfs.ext4 /dev/xvda3
+mkfs.ext4 /dev/xvda4
+mkfs.ext4 /dev/xvda5
+mkfs.ext4 /dev/xvda6
+
 mount /dev/xvda2 /mnt
+mkdir /mnt/var
+mount /dev/xvda3 /mnt/var
+mkdir /mnt/var/log
+mount /dev/xvda4 /mnt/var/log
+mkdir /mnt/var/log/audit
+mount /dev/xvda5 /mnt/var/log/audit
 mkdir /mnt/home
-mount /dev/xvda3 /mnt/home
+mount /dev/xvda6 /mnt/home
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
 # copied over to the new installation in the process.
 cat mirrorlist > /etc/pacman.d/mirrorlist
 
 # Main install command - bootstrap Arch Linux
-pacstrap /mnt base linux linux-firmware grub openssh sudo nano
+pacstrap /mnt base linux linux-firmware grub openssh sudo nano salt
 
 # Create file system table:
 genfstab -U /mnt >> /mnt/etc/fstab
