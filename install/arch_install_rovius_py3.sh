@@ -111,8 +111,8 @@ sed -i 's/#IgnorePkg   =/IgnorePkg   = python-msgpack/' /etc/pacman.conf
 wget -P /var/cache/pacman/pkg \
 	https://archive.archlinux.org/packages/p/python-msgpack/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
-runuser $SUDOUSER -c 'git clone https://aur.archlinux.org/salt-py3.git'
-runuser $SUDOUSER -c 'cd /home/user/salt-py3;makepkg -s'
+runuser $SUDOUSER -c 'cd ~;git clone https://aur.archlinux.org/salt-py3.git'
+runuser $SUDOUSER -c 'cd ~/salt-py3;makepkg -s'
 pacman -U --noconfirm /home/user/salt-py3/salt-py3-3000.1-2-any.pkg.tar.xz
 
 # Salt configuration
