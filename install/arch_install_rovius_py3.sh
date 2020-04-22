@@ -15,7 +15,7 @@ KEYBOARD="us"
 #MASTER_IP="saltmaster"
 #M_PORT="4506"
 #P_PORT="4505"
-HOSTNAME="minion-2"
+HOSTNAME="minion-"
 
 SUDOUSER="user"
 # Silly settings
@@ -107,9 +107,17 @@ sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"' /etc/default
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Salt install
+sed -i 's/#IgnorePkg   =/IgnorePkg   = python-msgpack/' /etc/pacman.conf
+wget -P /var/cache/pacman/pkg \
+	https://archive.archlinux.org/packages/p/python-msgpack/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
+pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
+runuser $SUDOUSER -c 'git clone https://aur.archlinux.org/salt-py3.git'
+runuser $SUDOUSER -c 'cd /home/user/salt-py3;makepkg -s'
+pacman -U --noconfirm /home/user/salt-py3/salt-py3-3000.1-2-any.pkg.tar.xz
 
-#systemctl enable salt-minion
-#echo -e "master: $MASTER_IP\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
+# Salt configuration
+systemctl enable salt-minion
+echo -e "master: $MASTER_IP\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
 
 EOF
 
