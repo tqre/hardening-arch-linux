@@ -30,7 +30,7 @@ mkfs.ext4 /dev/vda3
 mkfs.ext4 /dev/vda4
 mkfs.ext4 /dev/vda5
 mkfs.ext4 /dev/vda6
-mffs.ext4 /dev/vda7
+mkfs.ext4 /dev/vda7
 
 tune2fs -L ROOT /dev/vda2
 tune2fs -L VAR /dev/vda3
