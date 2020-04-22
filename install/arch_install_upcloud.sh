@@ -4,7 +4,7 @@
 # partition_map -file with no questions asked. I take no responsibility
 # if you delete your data. Always keep backups.
 
-# Tested on Rovius Cloud Platform
+# Tested on UpCloud
 
 # General settings:
 TZ="Europe/Helsinki"
@@ -32,12 +32,12 @@ mkfs.ext4 /dev/vda5
 mkfs.ext4 /dev/vda6
 mffs.ext4 /dev/vda7
 
-tune2fs -L ROOT /dev/xvda2
-tune2fs -L VAR /dev/xvda3
-tune2fs -L VAR_TMP /dev/xvda4
-tune2fs -L VAR_LOG /dev/xvda5
-tune2fs -L VAR_LOG_AUDIT /dev/xvda6
-tune2fs -L HOME /dev/xvda7
+tune2fs -L ROOT /dev/vda2
+tune2fs -L VAR /dev/vda3
+tune2fs -L VAR_TMP /dev/vda4
+tune2fs -L VAR_LOG /dev/vda5
+tune2fs -L VAR_LOG_AUDIT /dev/vda6
+tune2fs -L HOME /dev/vda7
 
 mount /dev/vda2 /mnt
 mkdir /mnt/var
