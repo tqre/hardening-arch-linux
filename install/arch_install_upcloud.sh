@@ -56,7 +56,7 @@ mount /dev/vda7 /mnt/home
 cat mirrorlist > /etc/pacman.d/mirrorlist
 
 # Main install command - bootstrap Arch Linux
-pacstrap /mnt base linux linux-firmware grub openssh sudo nano
+pacstrap /mnt base linux grub openssh sudo nano
 
 # Create file system table:
 genfstab -L /mnt >> /mnt/etc/fstab
