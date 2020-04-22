@@ -15,7 +15,7 @@ KEYBOARD="us"
 #MASTER_IP="saltmaster"
 #M_PORT="4506"
 #P_PORT="4505"
-#HOSTNAME="minion"
+HOSTNAME="minion-2"
 
 SUDOUSER="user"
 # Silly settings
