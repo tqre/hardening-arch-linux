@@ -10,47 +10,56 @@
 TZ="Europe/Helsinki"
 LOC="en_US.UTF-8"
 KEYBOARD="us"
-HOSTNAME="archlinux-roviustest"
+HOSTNAME="archmaster-upcloud"
 SUDOUSER="user"
 
 # Silly settings
 PASSWORD="user"
 
-# Which NTP server are we actually using?
 timedatectl set-ntp true
 
 # SSH Settings
 SSH_PORT="22"
-#SSH_PUB_KEY=$(cat id_rsa.pub)
+SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting and mounting
-sfdisk /dev/xvda < partition_map_rovius_32
-mkfs.vfat /dev/xvda1
-mkfs.ext4 /dev/xvda2
-mkfs.ext4 /dev/xvda3
-mkfs.ext4 /dev/xvda4
-mkfs.ext4 /dev/xvda5
-mkfs.ext4 /dev/xvda6
+sfdisk /dev/vda < partition_map_upcloud_50
+mkfs.vfat /dev/vda1
+mkfs.ext4 /dev/vda2
+mkfs.ext4 /dev/vda3
+mkfs.ext4 /dev/vda4
+mkfs.ext4 /dev/vda5
+mkfs.ext4 /dev/vda6
+mffs.ext4 /dev/vda7
 
-mount /dev/xvda2 /mnt
+tune2fs -L ROOT /dev/xvda2
+tune2fs -L VAR /dev/xvda3
+tune2fs -L VAR_TMP /dev/xvda4
+tune2fs -L VAR_LOG /dev/xvda5
+tune2fs -L VAR_LOG_AUDIT /dev/xvda6
+tune2fs -L HOME /dev/xvda7
+
+mount /dev/vda2 /mnt
 mkdir /mnt/var
-mount /dev/xvda3 /mnt/var
+mount /dev/vda3 /mnt/var
+mkdir /mnt/var/tmp
+mount /dev/vda4 /mnt/var/tmp
 mkdir /mnt/var/log
-mount /dev/xvda4 /mnt/var/log
+mount /dev/vda5 /mnt/var/log
 mkdir /mnt/var/log/audit
-mount /dev/xvda5 /mnt/var/log/audit
+mount /dev/vda6 /mnt/var/log/audit
 mkdir /mnt/home
-mount /dev/xvda6 /mnt/home
+mount /dev/vda7 /mnt/home
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
 # copied over to the new installation in the process.
 cat mirrorlist > /etc/pacman.d/mirrorlist
 
 # Main install command - bootstrap Arch Linux
-pacstrap /mnt base linux linux-firmware grub openssh sudo nano salt
+pacstrap /mnt base linux linux-firmware grub openssh sudo nano
 
 # Create file system table:
-genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -L /mnt >> /mnt/etc/fstab
 
 # Settings: here-document is piped to chroot
 cat << EOF | arch-chroot /mnt
@@ -71,8 +80,8 @@ echo -e "127.0.0.1 localhost\n::1 localhost" > /etc/hosts
 useradd -m $SUDOUSER
 # Now this is plain silly on a security focused project. Better way to do this?
 echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
-#runuser $SUDOUSER -c 'mkdir ~/.ssh'
-#runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
+runuser $SUDOUSER -c 'mkdir ~/.ssh'
+runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
 
 # SSH Settings:
 
@@ -80,13 +89,12 @@ echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
 sed -i "s/#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
 # Disable sftp subsystem
 sed -i 's/Subsystem/#Subsystem/' /etc/ssh/sshd_config
-#sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 sed -i '/#PermitRootLogin pro/c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl enable sshd
 
 # GRUB installation
-# Timeout is zero, no password? Is it possible to hijack the system here?
-grub-install --target=i386-pc /dev/xvda
+grub-install --target=i386-pc /dev/vda
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
