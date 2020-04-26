@@ -29,6 +29,7 @@ SSH_PORT="22"
 #SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting, labelling and mounting
+# TODO: move these to a separate file
 sfdisk /dev/xvda < partition_map_rovius_32
 mkfs.vfat /dev/xvda1
 mkfs.ext4 /dev/xvda2
@@ -115,6 +116,7 @@ wget -P /var/cache/pacman/pkg \
 pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 
 #TODO: download built salt-py3 pkg.tar.xz
+#wget --ca-certificate=/etc/ssl/private/saltmaster.crt https://saltmaster:PORT/testfile
 #TODO: pacman.conf settings to automatically get this from our fileserver
 #pacman -U --noconfirm /path/to/salt-py3-3000.1-2-any.pkg.tar.xz
 
