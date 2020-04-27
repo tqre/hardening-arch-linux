@@ -6,6 +6,9 @@
 
 # Tested on Rovius Cloud Platform
 
+# Settings:
+HD_DEVICE=xvda
+
 # General settings:
 TZ="Europe/Helsinki"
 LOC="en_US.UTF-8"
@@ -18,8 +21,8 @@ KEYBOARD="us"
 HOSTNAME="minion-"
 MASTER_CERT=$(cat saltmaster.crt)
 
-SUDOUSER="user"
 # Silly settings
+SUDOUSER="user"
 PASSWORD="user"
 
 timedatectl set-ntp true
@@ -29,8 +32,8 @@ SSH_PORT="22"
 #SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting, labelling and mounting
-sfdisk /dev/xvda < partitions/partition_map_rovius_32
-partitions/prepare.sh
+sfdisk /dev/$HD_DEVICE < partitions/partition_map_rovius_32
+partitions/prepare.sh $HD_DEVICE
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
 # copied over to the new installation in the process.
@@ -61,8 +64,8 @@ echo $MASTER_CERT > /etc/ssl/private/saltmaster.crt
 echo $HOSTNAME > /etc/hostname
 echo -e "127.0.0.1 localhost\n::1 localhost\n$MASTER_IP saltmaster" > /etc/hosts
 
-useradd -m $SUDOUSER
 # Now this is plain silly on a security focused project. Better way to do this?
+useradd -m $SUDOUSER
 echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
 #runuser $SUDOUSER -c 'mkdir ~/.ssh'
 #runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
@@ -77,7 +80,7 @@ sed -i '/#PermitRootLogin pro/c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl enable sshd
 
 # GRUB installation
-grub-install --target=i386-pc /dev/xvda
+grub-install --target=i386-pc /dev/$HD_DEVICE
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -94,8 +97,8 @@ pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.ta
 #pacman -U --noconfirm /path/to/salt-py3-3000.1-2-any.pkg.tar.xz
 
 # Salt configuration
-systemctl enable salt-minion
-echo -e "master: saltmaster\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
+#systemctl enable salt-minion
+#echo -e "master: saltmaster\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
 
 EOF
 
