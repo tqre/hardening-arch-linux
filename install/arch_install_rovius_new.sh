@@ -15,11 +15,11 @@ LOC="en_US.UTF-8"
 KEYBOARD="us"
 
 # Salt settings
-#MASTER_IP="<ip-address>"
+MASTER_IP="<ip-address>"
+FILESERVER_PORT="80"
 #M_PORT="4506"
 #P_PORT="4505"
 HOSTNAME="minion-"
-MASTER_CERT=$(cat saltmaster.crt)
 
 # Silly settings
 SUDOUSER="user"
@@ -47,6 +47,8 @@ python-m2crypto python-systemd python-distro python-pycryptodomex
 # Create filesystem table:
 genfstab -L /mnt >> /mnt/etc/fstab
 
+# Copy the saltmaster certificate to the new machine
+cp saltmaster.crt /mnt/etc/ssl/private/saltmaster.crt
 
 # Chroot setup:
 # here-document is piped to chroot
@@ -63,7 +65,6 @@ echo "$SUDOUSER ALL=(ALL) ALL" >> /etc/sudoers
 echo -e "[Match]\nName=eth0\n\n[Network]\nDHCP=true" > /etc/systemd/network/dhcp.network
 systemctl enable systemd-networkd.service
 
-echo $MASTER_CERT > /etc/ssl/private/saltmaster.crt
 echo $HOSTNAME > /etc/hostname
 echo -e "127.0.0.1 localhost\n::1 localhost\n$MASTER_IP saltmaster" > /etc/hosts
 
@@ -95,13 +96,14 @@ wget -P /var/cache/pacman/pkg \
 pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 
 #TODO: download built salt-py3 pkg.tar.xz
-#wget --ca-certificate=/etc/ssl/private/saltmaster.crt https://saltmaster:PORT/testfile
-#TODO: pacman.conf settings to automatically get this from our fileserver
-#pacman -U --noconfirm /path/to/salt-py3-3000.1-2-any.pkg.tar.xz
+wget -P /var/cache/pacman/pkg/ \
+	--ca-certificate=/etc/ssl/private/saltmaster.crt \
+	https://saltmaster:$FILESERVER_PORT/salt-py3.1-2-any.pkg.tar.xz
+pacman -U --noconfirm /var/cache/pacman/pkg/salt-py3-3000.1-2-any.pkg.tar.xz
 
 # Salt configuration
-#systemctl enable salt-minion
-#echo -e "master: saltmaster\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
+systemctl enable salt-minion
+echo -e "master: saltmaster\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
 
 EOF
 
