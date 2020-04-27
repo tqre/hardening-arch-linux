@@ -17,8 +17,8 @@ KEYBOARD="us"
 # Salt settings
 MASTER_IP="<ip-address>"
 FILESERVER_PORT="80"
-#M_PORT="4506"
-#P_PORT="4505"
+M_PORT="4506"
+P_PORT="4505"
 HOSTNAME="minion-"
 
 # Silly settings
@@ -98,7 +98,7 @@ pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.ta
 #TODO: download built salt-py3 pkg.tar.xz
 wget -P /var/cache/pacman/pkg/ \
 	--ca-certificate=/etc/ssl/private/saltmaster.crt \
-	https://saltmaster:$FILESERVER_PORT/salt-py3.1-2-any.pkg.tar.xz
+	https://saltmaster:$FILESERVER_PORT/salt-py3-3000.1-2-any.pkg.tar.xz
 pacman -U --noconfirm /var/cache/pacman/pkg/salt-py3-3000.1-2-any.pkg.tar.xz
 
 # Salt configuration
