@@ -20,18 +20,20 @@ tune2fs -L VAR_LOG /dev/$15
 tune2fs -L VAR_LOG_AUDIT /dev/$16
 tune2fs -L HOME /dev/$17
 
-# Make directories
+# Mount and make directories for the partitions
+mount /dev/$12 /mnt
+
 mkdir /mnt/var
+mount /dev/$13 /mnt/var
+
 mkdir /mnt/var/tmp
 mkdir /mnt/var/log
-mkdir /mnt/var/log/audit
-mkdir /mnt/home
-
-# Mount partitions
-mount /dev/$12 /mnt
-mount /dev/$13 /mnt/var
 mount /dev/$14 /mnt/var/tmp
 mount /dev/$15 /mnt/var/log
+
+mkdir /mnt/var/log/audit
 mount /dev/$16 /mnt/var/log/audit
+
+mkdir /mnt/home
 mount /dev/$17 /mnt/home
 
