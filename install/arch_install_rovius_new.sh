@@ -47,8 +47,11 @@ python-m2crypto python-systemd python-distro python-pycryptodomex
 # Create filesystem table:
 genfstab -L /mnt >> /mnt/etc/fstab
 
-# Settings: here-document is piped to chroot
+
+# Chroot setup:
+# here-document is piped to chroot
 cat << EOF | arch-chroot /mnt
+
 ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 hwclock --systohc
 sed -i 's/#$LOC/$LOC/' /etc/locale.gen
@@ -85,7 +88,7 @@ sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Salt install
+# Install old python-msgpack for Salt-py3, make pacman to ignore it in the future
 sed -i 's/#IgnorePkg   =/IgnorePkg   = python-msgpack/' /etc/pacman.conf
 wget -P /var/cache/pacman/pkg \
 	https://archive.archlinux.org/packages/p/python-msgpack/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
