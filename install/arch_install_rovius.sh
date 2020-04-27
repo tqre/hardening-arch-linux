@@ -6,19 +6,23 @@
 
 # Tested on Rovius Cloud Platform
 
+# Settings:
+HD_DEVICE=xvda
+
 # General settings:
 TZ="Europe/Helsinki"
 LOC="en_US.UTF-8"
 KEYBOARD="us"
 
 # Salt settings
-#MASTER_IP="saltmaster"
-#M_PORT="4506"
-#P_PORT="4505"
+MASTER_IP="<ip-address>"
+FILESERVER_PORT="80"
+M_PORT="4506"
+P_PORT="4505"
 HOSTNAME="minion-"
 
-SUDOUSER="user"
 # Silly settings
+SUDOUSER="user"
 PASSWORD="user"
 
 timedatectl set-ntp true
@@ -28,49 +32,28 @@ SSH_PORT="22"
 #SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting, labelling and mounting
-sfdisk /dev/xvda < partition_map_rovius_32
-mkfs.vfat /dev/xvda1
-mkfs.ext4 /dev/xvda2
-mkfs.ext4 /dev/xvda3
-mkfs.ext4 /dev/xvda4
-mkfs.ext4 /dev/xvda5
-mkfs.ext4 /dev/xvda6
-mkfs.ext4 /dev/xvda7
-
-# Label the partitions for easier Salt handling
-tune2fs -L ROOT /dev/xvda2
-tune2fs -L VAR /dev/xvda3
-tune2fs -L VAR_TMP /dev/xvda4
-tune2fs -L VAR_LOG /dev/xvda5
-tune2fs -L VAR_LOG_AUDIT /dev/xvda6
-tune2fs -L HOME /dev/xvda7
-
-mount /dev/xvda2 /mnt
-mkdir /mnt/var
-mount /dev/xvda3 /mnt/var
-mkdir /mnt/var/tmp
-mount /dev/xvda4 /mnt/var/tmp
-mkdir /mnt/var/log
-mount /dev/xvda5 /mnt/var/log
-mkdir /mnt/var/log/audit
-mount /dev/xvda6 /mnt/var/log/audit
-mkdir /mnt/home
-mount /dev/xvda7 /mnt/home
+sfdisk /dev/$HD_DEVICE < partitions/partition_map_rovius_32
+partitions/prepare.sh $HD_DEVICE
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
 # copied over to the new installation in the process.
 cat mirrorlist > /etc/pacman.d/mirrorlist
 
 # Main install command - bootstrap Arch Linux
-pacstrap /mnt base base-devel linux grub openssh sudo nano git wget python \
+pacstrap /mnt base linux grub openssh sudo nano wget python \
 python-jinja python-yaml python-markupsafe python-requests python-pyzmq \
 python-m2crypto python-systemd python-distro python-pycryptodomex
 
 # Create filesystem table:
 genfstab -L /mnt >> /mnt/etc/fstab
 
-# Settings: here-document is piped to chroot
+# Copy the saltmaster certificate to the new machine
+cp saltmaster.crt /mnt/etc/ssl/private/saltmaster.crt
+
+# Chroot setup:
+# here-document is piped to chroot
 cat << EOF | arch-chroot /mnt
+
 ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 hwclock --systohc
 sed -i 's/#$LOC/$LOC/' /etc/locale.gen
@@ -83,10 +66,10 @@ echo -e "[Match]\nName=eth0\n\n[Network]\nDHCP=true" > /etc/systemd/network/dhcp
 systemctl enable systemd-networkd.service
 
 echo $HOSTNAME > /etc/hostname
-echo -e "127.0.0.1 localhost\n::1 localhost" > /etc/hosts
+echo -e "127.0.0.1 localhost\n::1 localhost\n$MASTER_IP saltmaster" > /etc/hosts
 
-useradd -m $SUDOUSER
 # Now this is plain silly on a security focused project. Better way to do this?
+useradd -m $SUDOUSER
 echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
 #runuser $SUDOUSER -c 'mkdir ~/.ssh'
 #runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
@@ -101,23 +84,26 @@ sed -i '/#PermitRootLogin pro/c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl enable sshd
 
 # GRUB installation
-grub-install --target=i386-pc /dev/xvda
+grub-install --target=i386-pc /dev/$HD_DEVICE
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Salt install
+# Install old python-msgpack for Salt-py3, make pacman to ignore it in the future
 sed -i 's/#IgnorePkg   =/IgnorePkg   = python-msgpack/' /etc/pacman.conf
 wget -P /var/cache/pacman/pkg \
 	https://archive.archlinux.org/packages/p/python-msgpack/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
-runuser $SUDOUSER -c 'cd ~;git clone https://aur.archlinux.org/salt-py3.git'
-runuser $SUDOUSER -c 'cd ~/salt-py3;makepkg -s'
-pacman -U --noconfirm /home/user/salt-py3/salt-py3-3000.1-2-any.pkg.tar.xz
+
+#TODO: download built salt-py3 pkg.tar.xz
+wget -P /var/cache/pacman/pkg/ \
+	--ca-certificate=/etc/ssl/private/saltmaster.crt \
+	https://saltmaster:$FILESERVER_PORT/salt-py3-3000.1-2-any.pkg.tar.xz
+pacman -U --noconfirm /var/cache/pacman/pkg/salt-py3-3000.1-2-any.pkg.tar.xz
 
 # Salt configuration
 systemctl enable salt-minion
-echo -e "master: $MASTER_IP\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
+echo -e "master: saltmaster\nmaster_port: $M_PORT\npublish_port: $P_PORT\nid: $HOSTNAME" > /etc/salt/minion
 
 EOF
 
