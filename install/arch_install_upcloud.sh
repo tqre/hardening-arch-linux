@@ -5,26 +5,21 @@
 # if you delete your data. Always keep backups.
 
 # ! Untested version
-
-# Settings:
 HD_DEVICE=vda
+timedatectl set-ntp true
 
 # General settings:
 TZ="Europe/Helsinki"
 LOC="en_US.UTF-8"
 KEYBOARD="us"
-HOSTNAME="archmaster-upcloud"
+HOSTNAME="saltmaster"
 SUDOUSER="user"
-PASSWORD="user"
-
-timedatectl set-ntp true
-
-# SSH Settings
 SSH_PORT="22"
 SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting and mounting
 sfdisk /dev/$HD_DEVICE < partitions/partition_map_upcloud_50
+chmod +x partitions/prepare.sh
 partitions/prepare.sh $HD_DEVICE
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
@@ -58,13 +53,10 @@ echo $HOSTNAME > /etc/hostname
 echo -e "127.0.0.1 localhost\n::1 localhost" > /etc/hosts
 
 useradd -m $SUDOUSER
-echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
 runuser $SUDOUSER -c 'mkdir ~/.ssh'
 runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
 
-# SSH Settings:
-
-# Change default port
+# SSH configuration
 sed -i "s/#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
 # Disable sftp subsystem
 sed -i 's/Subsystem/#Subsystem/' /etc/ssh/sshd_config
@@ -88,3 +80,10 @@ EOF
 
 # Copy existing DNS settings to new installation
 cp /etc/resolv.conf /mnt/etc/resolv.conf
+
+echo To finish the installation, set the password for the user account:
+echo Enter the chroot environment with:
+echo arch-chroot
+echo And set the password with:
+echo passwd $SUDOUSER
+
