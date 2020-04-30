@@ -84,7 +84,7 @@ cp /etc/resolv.conf /mnt/etc/resolv.conf
 echo
 echo To finish the installation, set the password for the user account:
 echo Enter the chroot environment with:
-echo arch-chroot
+echo   arch-chroot /mnt
 echo And set the password with:
-echo passwd $SUDOUSER
+echo   passwd $SUDOUSER
 
