@@ -4,7 +4,10 @@
 # partition_map -file with no questions asked. I take no responsibility
 # if you delete your data. Always keep backups.
 
-# Tested on UpCloud
+# ! Untested version
+
+# Settings:
+HD_DEVICE=vda
 
 # General settings:
 TZ="Europe/Helsinki"
@@ -12,8 +15,6 @@ LOC="en_US.UTF-8"
 KEYBOARD="us"
 HOSTNAME="archmaster-upcloud"
 SUDOUSER="user"
-
-# Silly settings
 PASSWORD="user"
 
 timedatectl set-ntp true
@@ -23,40 +24,18 @@ SSH_PORT="22"
 SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting and mounting
-sfdisk /dev/vda < partition_map_upcloud_50
-mkfs.vfat /dev/vda1
-mkfs.ext4 /dev/vda2
-mkfs.ext4 /dev/vda3
-mkfs.ext4 /dev/vda4
-mkfs.ext4 /dev/vda5
-mkfs.ext4 /dev/vda6
-mkfs.ext4 /dev/vda7
-
-tune2fs -L ROOT /dev/vda2
-tune2fs -L VAR /dev/vda3
-tune2fs -L VAR_TMP /dev/vda4
-tune2fs -L VAR_LOG /dev/vda5
-tune2fs -L VAR_LOG_AUDIT /dev/vda6
-tune2fs -L HOME /dev/vda7
-
-mount /dev/vda2 /mnt
-mkdir /mnt/var
-mount /dev/vda3 /mnt/var
-mkdir /mnt/var/tmp
-mount /dev/vda4 /mnt/var/tmp
-mkdir /mnt/var/log
-mount /dev/vda5 /mnt/var/log
-mkdir /mnt/var/log/audit
-mount /dev/vda6 /mnt/var/log/audit
-mkdir /mnt/home
-mount /dev/vda7 /mnt/home
+sfdisk /dev/$HD_DEVICE < partitions/partition_map_upcloud_50
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
 # copied over to the new installation in the process.
 cat mirrorlist > /etc/pacman.d/mirrorlist
 
 # Main install command - bootstrap Arch Linux
-pacstrap /mnt base linux grub openssh sudo nano
+pacstrap /mnt base base-devel linux grub openssh sudo
+	nano wget git ufw nginx-mainline \
+	python python-jinja python-yaml python-markupsafe python-requests \
+	python-pyzmq python-m2crypto python-systemd python-distro \
+	python-pycryptodomex
 
 # Create file system table:
 genfstab -L /mnt >> /mnt/etc/fstab
@@ -78,7 +57,6 @@ echo $HOSTNAME > /etc/hostname
 echo -e "127.0.0.1 localhost\n::1 localhost" > /etc/hosts
 
 useradd -m $SUDOUSER
-# Now this is plain silly on a security focused project. Better way to do this?
 echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
 runuser $SUDOUSER -c 'mkdir ~/.ssh'
 runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
@@ -94,10 +72,16 @@ sed -i '/#PermitRootLogin pro/c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl enable sshd
 
 # GRUB installation
-grub-install --target=i386-pc /dev/vda
+grub-install --target=i386-pc /dev/$HD_DEVICE
 sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 sed -i '/LINUX_DEF/c\GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet random.trust_cpu=on"' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
+
+# Salt-py3 dependency installation:
+sed -i 's/#IgnorePkg   =/IgnorePkg   = python-msgpack/' /etc/pacman.conf
+wget -P /var/cache/pacman/pkg \
+        https://archive.archlinux.org/packages/p/python-msgpack/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
+pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 
 EOF
 

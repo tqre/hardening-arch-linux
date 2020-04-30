@@ -13,6 +13,8 @@ HD_DEVICE=xvda
 TZ="Europe/Helsinki"
 LOC="en_US.UTF-8"
 KEYBOARD="us"
+SUDOUSER="user"
+PASSWORD="user"
 
 # Salt settings
 MASTER_IP="<ip-address>"
@@ -20,10 +22,6 @@ FILESERVER_PORT="80"
 M_PORT="4506"
 P_PORT="4505"
 HOSTNAME="minion-"
-
-# Silly settings
-SUDOUSER="user"
-PASSWORD="user"
 
 timedatectl set-ntp true
 
