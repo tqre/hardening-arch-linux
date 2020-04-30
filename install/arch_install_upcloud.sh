@@ -31,7 +31,7 @@ sfdisk /dev/$HD_DEVICE < partitions/partition_map_upcloud_50
 cat mirrorlist > /etc/pacman.d/mirrorlist
 
 # Main install command - bootstrap Arch Linux
-pacstrap /mnt base base-devel linux grub openssh sudo
+pacstrap /mnt base base-devel linux grub openssh \
 	nano wget git ufw nginx-mainline \
 	python python-jinja python-yaml python-markupsafe python-requests \
 	python-pyzmq python-m2crypto python-systemd python-distro \
