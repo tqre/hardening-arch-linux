@@ -25,6 +25,7 @@ SSH_PUB_KEY=$(cat id_rsa.pub)
 
 # Disk partitioning, formatting and mounting
 sfdisk /dev/$HD_DEVICE < partitions/partition_map_upcloud_50
+partitions/prepare.sh $HD_DEVICE
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
 # copied over to the new installation in the process.
