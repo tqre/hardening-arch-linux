@@ -86,18 +86,17 @@ wget -P /var/cache/pacman/pkg \
 pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 
 # Update trust anchors:
-trust-anchor /etc/ssl/private/saltmaster.crt
+trust anchor /etc/ssl/private/saltmaster.crt
 update-ca-trust
 
 # Download saltmaster's public GPG key to sudousers home directory
-mkidr /home/$SUDOUSER/.gnupg
-wget -P /home/$SUDOUSER/.gnupg \
-	https://saltmaster:$FILESERVER_PORT/saltmaster.gpg
+mkdir /home/$SUDOUSER/.gnupg
+wget -P /home/$SUDOUSER/.gnupghttps://saltmaster:$FILESERVER_PORT/saltmaster.gpg
 pacman-key --add /home/$SUDOUSER/.gnupg/saltmaster.gpg
 pacman-key --lsign-key $GPG_KEYID
 
 # Set up custom repository
-echo "[saltmaster-upcloud]\nServer = https://saltmaster:$FILESERVER_PORT\n" >> /etc/pacman.conf
+echo -e "[saltmaster]\nServer = https://saltmaster:$FILESERVER_PORT\n" >> /etc/pacman.conf
 pacman -Sy
 pacman -S --noconfirm salt-py3
 
