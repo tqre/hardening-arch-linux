@@ -4,10 +4,11 @@
 # partition_map -file with no questions asked. I take no responsibility
 # if you delete your data. Always keep backups.
 
-# Tested on Rovius Cloud Platform
+# ! Untested on Rovius Cloud Platform
 
 # Settings:
 HD_DEVICE=xvda
+timedatectl set-ntp true
 
 # General settings:
 TZ="Europe/Helsinki"
@@ -15,6 +16,7 @@ LOC="en_US.UTF-8"
 KEYBOARD="us"
 SUDOUSER="user"
 PASSWORD="user"
+GPG_KEYID=""
 
 # Salt settings
 MASTER_IP="<ip-address>"
@@ -23,14 +25,9 @@ M_PORT="4506"
 P_PORT="4505"
 HOSTNAME="minion-"
 
-timedatectl set-ntp true
-
-# SSH Settings
-SSH_PORT="22"
-#SSH_PUB_KEY=$(cat id_rsa.pub)
-
 # Disk partitioning, formatting, labelling and mounting
 sfdisk /dev/$HD_DEVICE < partitions/partition_map_rovius_32
+chmod +x partitions/prepare.sh
 partitions/prepare.sh $HD_DEVICE
 
 # Overwrite the installation ISO mirrorlist with a supplied one as it gets
@@ -66,15 +63,10 @@ systemctl enable systemd-networkd.service
 echo $HOSTNAME > /etc/hostname
 echo -e "127.0.0.1 localhost\n::1 localhost\n$MASTER_IP saltmaster" > /etc/hosts
 
-# Now this is plain silly on a security focused project. Better way to do this?
 useradd -m $SUDOUSER
 echo -e "$PASSWORD\n$PASSWORD" | passwd $SUDOUSER
-#runuser $SUDOUSER -c 'mkdir ~/.ssh'
-#runuser $SUDOUSER -c 'echo $SSH_PUB_KEY > ~/.ssh/authorized_keys'
 
 # SSH Settings:
-# Change default port
-sed -i "s/#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
 # Disable sftp subsystem
 sed -i 's/Subsystem/#Subsystem/' /etc/ssh/sshd_config
 #sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
@@ -93,11 +85,21 @@ wget -P /var/cache/pacman/pkg \
 	https://archive.archlinux.org/packages/p/python-msgpack/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 pacman -U --noconfirm /var/cache/pacman/pkg/python-msgpack-0.6.2-3-x86_64.pkg.tar.xz
 
-#TODO: download built salt-py3 pkg.tar.xz
-wget -P /var/cache/pacman/pkg/ \
-	--ca-certificate=/etc/ssl/private/saltmaster.crt \
-	https://saltmaster:$FILESERVER_PORT/salt-py3-3000.1-2-any.pkg.tar.xz
-pacman -U --noconfirm /var/cache/pacman/pkg/salt-py3-3000.1-2-any.pkg.tar.xz
+# Update trust anchors:
+trust-anchor /etc/ssl/private/saltmaster.crt
+update-ca-trust
+
+# Download saltmaster's public GPG key to sudousers home directory
+mkidr /home/$SUDOUSER/.gnupg
+wget -P /home/$SUDOUSER/.gnupg \
+	https://saltmaster:$FILESERVER_PORT/saltmaster.gpg
+pacman-key --add /home/$SUDOUSER/.gnupg/saltmaster.gpg
+pacman-key --lsign-key $GPG_KEYID
+
+# Set up custom repository
+echo "[saltmaster-upcloud]\nServer = https://saltmaster:$FILESERVER_PORT\n" >> /etc/pacman.conf
+pacman -Sy
+pacman -S --noconfirm salt-py3
 
 # Salt configuration
 systemctl enable salt-minion
