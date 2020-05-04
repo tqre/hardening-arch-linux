@@ -4,7 +4,7 @@
 # partition_map -file with no questions asked. I take no responsibility
 # if you delete your data. Always keep backups.
 
-# ! Untested on Rovius Cloud Platform
+# Tested and working on Rovius Cloud Platform
 
 # Settings:
 HD_DEVICE=xvda

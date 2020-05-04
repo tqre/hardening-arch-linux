@@ -4,7 +4,7 @@
 # partition_map -file with no questions asked. I take no responsibility
 # if you delete your data. Always keep backups.
 
-# ! Untested version
+# Tested and working  on UpCloud
 HD_DEVICE=vda
 timedatectl set-ntp true
 
