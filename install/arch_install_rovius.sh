@@ -91,7 +91,7 @@ update-ca-trust
 
 # Download saltmaster's public GPG key to sudousers home directory
 mkdir /home/$SUDOUSER/.gnupg
-wget -P /home/$SUDOUSER/.gnupghttps://saltmaster:$FILESERVER_PORT/saltmaster.gpg
+wget -P /home/$SUDOUSER/.gnupg https://saltmaster:$FILESERVER_PORT/saltmaster.gpg
 pacman-key --add /home/$SUDOUSER/.gnupg/saltmaster.gpg
 pacman-key --lsign-key $GPG_KEYID
 
