@@ -9,7 +9,7 @@
     - source: salt://managed_files/etc/grub.d/40_custom
     - user: root
     - group: root
-    - mode: 400
+    - mode: 500
   cmd.run:
     - name: grub-mkconfig -o /boot/grub/grub.cfg
     - onchanges:
