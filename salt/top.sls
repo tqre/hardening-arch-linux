@@ -5,3 +5,4 @@ base:
     - harden_mounts
     - bootloader
     - package_management
+    - aslr
