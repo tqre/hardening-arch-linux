@@ -5,3 +5,4 @@ include:
   - network.log_martians
   - network.icmp_ignore
   - network.reverse_path_filtering
+  - network.syncookies
