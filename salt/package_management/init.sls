@@ -12,3 +12,6 @@
     - group: root
     - mode: 644
 
+archlinux-keyring:
+  pkg.installed:
+    - refresh: True
