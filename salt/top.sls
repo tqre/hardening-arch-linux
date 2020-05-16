@@ -6,3 +6,4 @@ base:
     - bootloader
     - package_management
     - aslr
+    - network
