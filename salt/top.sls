@@ -7,3 +7,4 @@ base:
     - package_management
     - aslr
     - network
+    - aide
