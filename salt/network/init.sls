@@ -3,3 +3,4 @@ include:
   - network.disable_icmp_redirects
   - network.disable_source_routing
   - network.log_martians
+  - network.icmp_ignore
