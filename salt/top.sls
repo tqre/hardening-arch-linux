@@ -4,3 +4,4 @@ base:
     - disable_usb
     - harden_mounts
     - bootloader
+    - package_management
