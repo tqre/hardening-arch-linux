@@ -4,3 +4,4 @@ include:
   - network.disable_source_routing
   - network.log_martians
   - network.icmp_ignore
+  - network.reverse_path_filtering
