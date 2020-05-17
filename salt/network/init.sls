@@ -1,3 +1,7 @@
+/etc/sysctl.d/network.conf:
+  file.managed:
+    - source: salt://managed_files/etc/sysctl.d/network.conf
+
 include:
   - network.disable_forwarding
   - network.disable_icmp_redirects
