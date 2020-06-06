@@ -1,0 +1,2 @@
+Dummy public cert key
+Use helper_scripts/cert/create_cert.sh to make new certificates on master
