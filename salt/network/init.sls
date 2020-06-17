@@ -10,3 +10,4 @@ include:
   - network.icmp_ignore
   - network.reverse_path_filtering
   - network.syncookies
+  - network.unused_network_modules
